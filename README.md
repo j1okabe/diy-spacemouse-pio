@@ -1,12 +1,32 @@
 # DIY Spacemouse for Fusion 360
+build enviroment : PlatformIo
 
-Watch the build video ↓
 
-[<img src="/Images/Spacemouse_Thumbnail@2x.png">](https://youtu.be/iHBgNGnTiK4)
+# Requirement
+* Visual Studio Code
+* PlatfromIO
 
-This device is made for Fusion360 but can be adapted to other CAD applications. Current features: Orbit, Pan, Home view and Fit to view.
 
-Build instructions → [Instructables](https://www.instructables.com/DIY-Space-Mouse-for-Fusion-360-Using-Magnets)
+change from original
+- just using <Adafruit_TinyUSB.h>
+- use three full color serial leds.
+- chage key conbination of "Home" to CLRT+SHFIT+h
+
+---
+![stem](/images/stem.jpg "stem")
+
+![knob](/images/knob.jpg "knob")
+
+![wire_soldering](/images/wire_soldering.jpg "wire_soldering")
+
+# DEMO
+![idleing rainbow](/images/idleing_color.gif "rainbow")
+
+---
+* junichiro okabe  KYOTO, JAPAN 
+
+* E-mail j1okabe＠gmail.com
+
 
 [![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa]
 

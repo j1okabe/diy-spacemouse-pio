@@ -51,7 +51,8 @@ float xOffset = 0, yOffset = 0, zOffset = 0;
 float xCurrent = 0, yCurrent = 0, zCurrent = 0;
 
 int calSamples = 300;
-int sensivity = 8;
+// int sensivity = 8; //org
+int sensivity = 16;
 int magRange = 3;
 int outRange = 127;      // Max allowed in HID report
 float xyThreshold = 0.4; // Center threshold
@@ -189,15 +190,17 @@ void loop()
     // Mouse.press(MOUSE_MIDDLE);
     if (usb_hid.ready())
     {
-      if (mouseMoving == false)
-      {
-        mouseMoving = true;
-        usb_hid.mouseButtonPress(RID_MOUSE, MOUSE_BUTTON_MIDDLE);
-        delay(10);
-      }
+      mouseMoving = true;
       // Mouse.move(yMove, xMove, 0);
-      usb_hid.mouseMove(RID_MOUSE, xMove, yMove);
+      usb_hid.mouseReport(RID_MOUSE, MOUSE_BUTTON_MIDDLE, xMove, yMove, 0, 0);
       delay(10);
+      // for seisitivity monitor
+      // Serial.print(xMove);
+      // Serial.print(",");
+      // Serial.print(yMove);
+      // Serial.print(",");
+      // Serial.print(zCurrent);
+      // Serial.println();
     }
   }
   else

@@ -13,14 +13,14 @@ change from original
 - chage key conbination of "Home" to CLRT+SHFIT+h
 
 ---
-![stem](/images/stem.jpg "stem")
+![stem](Images/stem.jpg "stem")
 
-![knob](/images/knob.jpg "knob")
+![knob](Images/knob.jpg "knob")
 
-![wire_soldering](/images/wire_soldering.jpg "wire_soldering")
+![wire_soldering](Images/wire_soldering.jpg "wire_soldering")
 
 # DEMO
-![idleing rainbow](/images/idleing_color.gif "rainbow")
+![idleing rainbow](Images/idleing_color.gif "rainbow")
 
 ---
 * junichiro okabe  KYOTO, JAPAN 

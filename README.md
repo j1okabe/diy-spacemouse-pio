@@ -10,7 +10,7 @@ build enviroment : PlatformIo
 change from original
 - just using <Adafruit_TinyUSB.h>
 - use three full color serial leds.
-- chage key conbination of "Home" to CTRL+SHFIT+h
+- chage key conbination of "Home" to CTRL+SHIFT+h
 
 ---
 ![stem](Images/stem.jpg "stem")

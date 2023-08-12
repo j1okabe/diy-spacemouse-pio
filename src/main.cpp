@@ -14,7 +14,8 @@
 #define QWIIC_I2C_PORT Wire1
 
 #define COLOR_UNCALIB (CRGB::Red)
-#define COLOR_CALIBDONE (CRGB::Blue)
+#define COLOR_CALIBDONE (Blue)
+// #define COLOR_CALIBDONE (CRGB::DeepSkyBlue)
 #define COLOR_PAN (CRGB::Green)
 #define COLOR_ORBIT (CRGB::Orange)
 #define COLOR_RAINBOW_POS0 (CRGB::Red)
@@ -76,9 +77,13 @@ void fitToScreen(void);
 
 void setup()
 {
-  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS); // GRB ordering is assumed
+  // GRB ordering is assumed
+  FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS)
+      .setCorrection(TypicalLEDStrip)
+      .setDither(1);
 
   FastLED.setBrightness(24);
+  FastLED.setTemperature(HighNoonSun);
 
   button1.attachClick(goHome);
   button1.attachLongPressStop(goHome);
@@ -128,7 +133,7 @@ void setup()
   fill_solid(leds, NUM_LEDS, CRGB::Black);
   FastLED.show();
   delay(100);
-  FastLED.setBrightness(12);
+  // FastLED.setBrightness(12);
   leds[0] = COLOR_RAINBOW_POS0;
   leds[1] = COLOR_RAINBOW_POS1;
   leds[2] = COLOR_RAINBOW_POS2;
@@ -254,8 +259,8 @@ void loop()
     {
       gHue = gHue_temp;
       fill_rainbow_circular(leds, NUM_LEDS, gHue, false);
-      FastLED.show();
     }
+    FastLED.show();
   }
 }
 

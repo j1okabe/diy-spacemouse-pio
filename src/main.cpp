@@ -8,20 +8,23 @@
 #include "FastLED.h"
 #include <OneButton.h>
 #include <SimpleKalmanFilter.h>
+#include <math.h>
 
 #define NUM_LEDS 3
 #define DATA_PIN 3
 #define QWIIC_I2C_PORT Wire1
 
 #define COLOR_UNCALIB (CRGB::Red)
-#define COLOR_CALIBDONE (Blue)
+// #define COLOR_CALIBDONE (0x003fff)
 // #define COLOR_CALIBDONE (CRGB::DeepSkyBlue)
+#define COLOR_CALIBDONE (CRGB::Blue)
 #define COLOR_PAN (CRGB::Green)
 #define COLOR_ORBIT (CRGB::Orange)
 #define COLOR_RAINBOW_POS0 (CRGB::Red)
 #define COLOR_RAINBOW_POS1 (CRGB::Green)
 #define COLOR_RAINBOW_POS2 (CRGB::Blue)
 
+#define MAG_REST_MAX (50)
 // Report ID
 enum
 {
@@ -75,6 +78,12 @@ void fadeTowardColor(CRGB *L, uint16_t N, const CRGB &bgColor, uint8_t fadeAmoun
 void goHome(void);
 void fitToScreen(void);
 
+void init_mag(void)
+{
+  mag.begin(QWIIC_I2C_PORT, TLV493D_ADDRESS2, true);
+  mag.setAccessMode(mag.MASTERCONTROLLEDMODE);
+  mag.disableTemp();
+}
 void setup()
 {
   // GRB ordering is assumed
@@ -104,9 +113,10 @@ void setup()
   }
   fill_solid(leds, NUM_LEDS, COLOR_UNCALIB);
   FastLED.show();
-  mag.begin(QWIIC_I2C_PORT, TLV493D_ADDRESS2, true);
-  mag.setAccessMode(mag.MASTERCONTROLLEDMODE);
-  mag.disableTemp();
+  // Wire1.begin();
+  Wire1.setClock(400000);
+  init_mag();
+
   // crude offset calibration on first boot
   for (int i = 1; i <= calSamples; i++)
   {
@@ -145,9 +155,15 @@ void setup()
   Serial.println("TinyUSB HID mouse key Composite");
 }
 
+uint8_t mag_reset = MAG_REST_MAX;
+uint16_t resetcount = 0;
+int32_t magint[3] = {0};
+int32_t lastval[3] = {0};
+bool freeze_watch(float *val);
+
 void loop()
 {
-
+  float magval[3] = {0.0};
   // keep watching the push buttons
   button1.tick();
   button2.tick();
@@ -155,11 +171,23 @@ void loop()
   // get the mag data
   delay(mag.getMeasurementDelay());
   mag.updateData();
+  magval[0] = mag.getX();
+  magval[1] = mag.getY();
+  magval[2] = mag.getZ();
 
+  bool needinit = freeze_watch(magval);
+  if (needinit)
+  {
+    Wire1.end();
+    init_mag();
+  }
+  else
+  {
   // update the filters
-  xCurrent = xFilter.updateEstimate(mag.getX() - xOffset);
-  yCurrent = yFilter.updateEstimate(mag.getY() - yOffset);
-  zCurrent = zFilter.updateEstimate(mag.getZ() - zOffset);
+    xCurrent = xFilter.updateEstimate(magval[0] - xOffset);
+    yCurrent = yFilter.updateEstimate(magval[1] - yOffset);
+    zCurrent = zFilter.updateEstimate(magval[2] - zOffset);
+  }
 
   // check the center threshold
   if (abs(xCurrent) > xyThreshold || abs(yCurrent) > xyThreshold)
@@ -185,6 +213,7 @@ void loop()
       if (usb_hid.ready() && isOrbit == false)
       {
         modifier = KEYBOARD_MODIFIER_LEFTSHIFT;
+        keycode[0] = 0;
         usb_hid.keyboardReport(RID_KEYBOARD, modifier, keycode);
         delay(10);
         isOrbit = true;
@@ -238,6 +267,8 @@ void loop()
   Serial.print(yCurrent);
   Serial.print(",");
   Serial.print(zCurrent);
+  Serial.print(",");
+  Serial.print(resetcount);
   Serial.println();
   if (mouseMoving)
   {
@@ -319,6 +350,46 @@ void fitToScreen()
     delay(10);
   }
   Serial.println("pressed fit");
+}
+
+bool freeze_watch(float *val)
+{
+  bool res;
+  res = false;
+  magint[0] = round(abs(val[0] * 100));
+  magint[1] = round(abs(val[1] * 100));
+  magint[2] = round(abs(val[2] * 100));
+
+  // Serial.print(magint[0], 4);
+  // Serial.print(",");
+  // Serial.print(magint[1], 4);
+  // Serial.print(",");
+  // Serial.print(magint[2], 4);
+  // Serial.print(",");
+  // Serial.print(resetcount);
+  // Serial.println();
+  if (lastval[0] == magint[0] && lastval[1] == magint[1] && lastval[2] == magint[2])
+  {
+    if (mag_reset)
+    {
+      mag_reset--;
+    }
+  }
+  else
+  {
+    mag_reset = MAG_REST_MAX;
+  }
+  if (mag_reset == 0)
+  {
+    res = true;
+    resetcount++;
+    fill_solid(leds, NUM_LEDS, COLOR_UNCALIB);
+    FastLED.show();
+  }
+  lastval[0] = magint[0];
+  lastval[1] = magint[1];
+  lastval[2] = magint[2];
+  return res;
 }
 
 // Helper function that blends one uint8_t toward another by a given amount

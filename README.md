@@ -12,6 +12,7 @@ change from original
 - use three full color serial leds.
 - chage key conbination of "Home" to CTRL+SHIFT+h
 
+- Added a process to monitor and reset the mag value as it may freeze, which may be specific to my device. 
 ---
 ![stem](Images/stem.jpg "stem")
 
